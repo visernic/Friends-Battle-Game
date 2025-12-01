@@ -1,0 +1,30 @@
+{
+  "name": "friends-battle-game",
+  "version": "1.0.0",
+  "description": "A high-performance, physics-based 1v1 battle engine featuring realistic collision dynamics and automated video generation.",
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "start": "npx serve .",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "echo \"Build script placeholder for future webpack integration\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/visernic/Friends-Battle-Game.git"
+  },
+  "keywords": [
+    "game-engine",
+    "physics",
+    "canvas",
+    "es6-modules",
+    "battle-maker",
+    "javascript"
+  ],
+  "author": "Professional Full Stack Developer",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/visernic/Friends-Battle-Game/issues"
+  },
+  "homepage": "https://github.com/visernic/Friends-Battle-Game#readme"
+}
