@@ -1,0 +1,34 @@
+/* * Components: Inputs & Buttons
+ * Custom styles for form elements.
+ */
+
+.custom-input {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid #444;
+    transition: all 0.3s ease;
+    color: white;
+}
+
+.custom-input:focus {
+    border-color: var(--neon-green);
+    box-shadow: 0 0 15px rgba(57, 255, 20, 0.2);
+    outline: none;
+}
+
+/* Social Media Buttons */
+.social-btn {
+    width: 30px; 
+    height: 30px;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer; 
+    transition: transform 0.2s;
+    flex-shrink: 0;
+}
+
+.social-btn:hover { transform: scale(1.1); }
+
+.tiktok-btn { background: #000; border: 1px solid #333; color: #ff0050; }
+.fb-btn { background: #1877F2; border: 1px solid #1877F2; color: white; }
