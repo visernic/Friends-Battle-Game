@@ -1,0 +1,21 @@
+/* * Abstract: Variables
+ * Defines global design tokens like colors and fonts.
+ */
+
+:root {
+    /* Brand Colors */
+    --neon-green: #39ff14;
+    --neon-red: #ff2a2a;
+    --neon-blue: #00ccff;
+    
+    /* Backgrounds */
+    --bg-dark: #050505;
+    --glass-bg: rgba(20, 20, 20, 0.85);
+    
+    /* Gradients */
+    --grad-primary: linear-gradient(90deg, #ff0055, #ff00de, #39ff14);
+    
+    /* Spacing & Borders */
+    --radius-xl: 16px;
+    --border-light: rgba(255, 255, 255, 0.1);
+}
