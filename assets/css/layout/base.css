@@ -1,0 +1,32 @@
+/* * Layout: Base
+ * Global resets and typography settings.
+ */
+
+body {
+    background-color: var(--bg-dark);
+    color: white;
+    font-family: 'Hind Siliguri', 'Roboto', sans-serif;
+    overflow-x: hidden;
+    background-image: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+    min-height: 100vh;
+}
+
+/* Canvas Container */
+.canvas-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 380px;
+    aspect-ratio: 9/16;
+    margin: 0 auto;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: 0 0 50px rgba(0, 255, 100, 0.15);
+    border: 2px solid #333;
+    background: #000;
+}
+
+canvas { 
+    width: 100%; 
+    height: 100%; 
+    display: block; 
+}
