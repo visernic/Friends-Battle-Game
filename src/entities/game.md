@@ -1,0 +1,1 @@
+An advanced, physics-based 1v1 battle engine built with Vanilla JavaScript. Featuring realistic collision dynamics, particle rendering systems, and automated video generation capabilities for social sharing. Designed with a modular architecture for high scalability.
