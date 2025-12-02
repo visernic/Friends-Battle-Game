@@ -7,4 +7,4 @@ require ROOT . "/internal/system/core/bootstrap.php";
 
 // Run Frontend
 $core = new Core\Engine\Engine();
-$core->run();
+$core->run(); 
