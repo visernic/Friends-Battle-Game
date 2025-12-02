@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <title>Epic Battle Maker</title>
+    <meta name="description" content="Create viral battle videos with realistic spinning physics.">
+    
+    <link rel="icon" type="image/png" href="https://i.postimg.cc/Qdb0JN9X/logo.png">
+    <link rel="apple-touch-icon" href="https://i.postimg.cc/Qdb0JN9X/logo.png">
+    <meta property="og:image" content="https://i.postimg.cc/Qdb0JN9X5622banner.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Hind+Siliguri:wght@400;600;700&family=Roboto:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root { --neon-green: #39ff14; }
+        body {
+            background-color: #050505;
+            color: white;
+            font-family: 'Hind Siliguri', 'Roboto', sans-serif;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+        }
+        
+        .glass {
+            background: rgba(20, 20, 20, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 380px;
+            aspect-ratio: 9/16;
+            margin: 0 auto;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 255, 100, 0.15);
+            border: 2px solid #333;
+            background: #000;
+        }
+        canvas { width: 100%; height: 100%; display: block; }
+
+        .custom-input {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid #444;
+            transition: all 0.3s ease;
+        }
+        .custom-input:focus {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.2);
+            outline: none;
+        }
+        
+        .progress-bar-anim {
+            background: linear-gradient(90deg, #ff0055, #ff00de, #39ff14);
+            background-size: 200% 200%;
+            animation: gradientMove 2s ease infinite;
+        }
+        @keyframes gradientMove { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+
+        .social-btn {
+            width: 30px; height: 30px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%;
+            cursor: pointer; transition: transform 0.2s;
+            flex-shrink: 0; /* Prevent shrinking */
+        }
+        .social-btn:hover { transform: scale(1.1); }
+        .tiktok-btn { background: #000; border: 1px solid #333; color: #ff0050; }
+        .fb-btn { background: #1877F2; border: 1px solid #1877F2; color: white; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <header class="w-full py-4 px-4 md:px-6 flex justify-between items-center glass sticky top-0 z-50">
+        <h1 class="text-xl md:text-3xl font-['Bangers'] tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500" style="text-shadow: 0 0 15px rgba(255,0,222,0.6);">
+            BATTLE MAKER
+        </h1>
+        <button onclick="shareApp()" class="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-green-400 px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm rounded-full font-bold border border-green-500/30 transition-all active:scale-95">
+            <i class="fa-solid fa-share-nodes"></i> <span class="md:inline">Share</span>
+        </button>
+    </header>
+
+    <main class="flex-grow w-full max-w-7xl mx-auto p-3 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 items-start">
+        
+        <div class="order-2 lg:order-1 flex flex-col gap-6 w-full">
+            <div class="glass p-4 md:p-6 rounded-3xl">
+                <div class="flex items-center gap-3 mb-6 border-b border-gray-700 pb-4">
+                    <i class="fa-solid fa-gamepad text-green-400 text-xl"></i>
+                    <h2 class="text-lg md:text-xl font-bold text-white">Setup Fighters</h2>
+                </div>
+
+                <!-- Player 1 -->
+                <div class="bg-gray-900/60 p-3 md:p-4 rounded-xl border border-red-500/30 mb-4 hover:border-red-500/60 transition">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="text-[10px] md:text-xs font-bold text-red-400 uppercase tracking-wider">Player 1 (Red)</label>
+                        <i class="fa-solid fa-user-ninja text-red-500/50"></i>
+                    </div>
+                    <div class="flex gap-3 items-center">
+                        <div id="p1-ui-preview" class="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gray-800 bg-cover bg-center border-2 border-red-500 shadow-[0_0_10px_rgba(255,0,0,0.3)] shrink-0"></div>
+                        <div class="w-full flex flex-col gap-2 min-w-0">
+                            <input type="text" id="name1" placeholder="Name (Ex: রাকিব)" class="custom-input w-full px-3 py-2 rounded-lg text-white text-xs md:text-sm font-['Hind_Siliguri']" maxlength="15">
+                            <div class="flex flex-wrap gap-2 items-center">
+                                <input type="file" id="upload1" accept="image/*" class="flex-1 min-w-0 text-[10px] md:text-xs text-gray-400 file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:bg-red-900 file:text-white cursor-pointer hover:file:bg-red-700 transition">
+                                <div class="flex gap-2 shrink-0">
+                                    <button class="social-btn tiktok-btn" onclick="openImportModal(1, 'tiktok')"><i class="fa-brands fa-tiktok"></i></button>
+                                    <button class="social-btn fb-btn" onclick="openImportModal(1, 'facebook')"><i class="fa-brands fa-facebook-f"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Player 2 -->
+                <div class="bg-gray-900/60 p-3 md:p-4 rounded-xl border border-blue-500/30 mb-6 hover:border-blue-500/60 transition">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="text-[10px] md:text-xs font-bold text-blue-400 uppercase tracking-wider">Player 2 (Blue)</label>
+                        <i class="fa-solid fa-user-astronaut text-blue-500/50"></i>
+                    </div>
+                    <div class="flex gap-3 items-center">
+                        <div id="p2-ui-preview" class="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gray-800 bg-cover bg-center border-2 border-blue-500 shadow-[0_0_10px_rgba(0,100,255,0.3)] shrink-0"></div>
+                        <div class="w-full flex flex-col gap-2 min-w-0">
+                            <input type="text" id="name2" placeholder="Name (Ex: তিশা)" class="custom-input w-full px-3 py-2 rounded-lg text-white text-xs md:text-sm font-['Hind_Siliguri']" maxlength="15">
+                            <div class="flex flex-wrap gap-2 items-center">
+                                <input type="file" id="upload2" accept="image/*" class="flex-1 min-w-0 text-[10px] md:text-xs text-gray-400 file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:bg-blue-900 file:text-white cursor-pointer hover:file:bg-blue-700 transition">
+                                <div class="flex gap-2 shrink-0">
+                                    <button class="social-btn tiktok-btn" onclick="openImportModal(2, 'tiktok')"><i class="fa-brands fa-tiktok"></i></button>
+                                    <button class="social-btn fb-btn" onclick="openImportModal(2, 'facebook')"><i class="fa-brands fa-facebook-f"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="startBtn" disabled class="w-full py-3 md:py-4 rounded-xl font-bold text-base md:text-lg uppercase tracking-wide bg-gradient-to-r from-green-500 to-emerald-600 text-black shadow-lg hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                    Start Battle (10 Goals)
+                </button>
+
+                <div id="processingUI" class="hidden mt-6">
+                    <div class="flex justify-between text-xs font-mono text-green-400 mb-2">
+                        <span class="animate-pulse">RENDERING VIDEO...</span>
+                        <span id="percentText">0%</span>
+                    </div>
+                    <div class="h-2 w-full bg-gray-800 rounded-full overflow-hidden">
+                        <div id="progressBar" class="h-full w-0 progress-bar-anim transition-all duration-100"></div>
+                    </div>
+                </div>
+
+                <div id="resultUI" class="hidden mt-6 flex gap-3 animate-fade-in">
+                    <button onclick="previewRecordedVideo()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-xl font-bold text-xs md:text-sm transition flex justify-center gap-2 items-center">
+                        <i class="fa-solid fa-play"></i> Preview
+                    </button>
+                    <button onclick="downloadVideo()" class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 rounded-xl font-bold text-xs md:text-sm shadow-lg hover:shadow-blue-500/50 transition flex justify-center gap-2 items-center">
+                        <i class="fa-solid fa-download"></i> Download MP4
+                    </button>
+                </div>
+            </div>
+            <div class="text-center text-[10px] md:text-xs text-gray-500 mt-2 pb-4">
+                <i class="fa-solid fa-circle-info mr-1"></i> Best experience on Chrome/Android
+            </div>
+        </div>
+
+        <div class="order-1 lg:order-2 flex flex-col items-center w-full">
+            <div class="flex justify-between w-full max-w-[380px] mb-2 px-2">
+                <span class="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-widest"><i class="fa-solid fa-mobile-screen mr-1"></i> Live View</span>
+                <span class="text-[8px] md:text-[10px] text-green-500 bg-green-900/30 px-2 py-0.5 rounded border border-green-500/30">HD 1080P</span>
+            </div>
+            
+            <div class="canvas-wrapper">
+                <canvas id="previewCanvas" width="540" height="960"></canvas>
+                <video id="finalVideo" controls class="absolute inset-0 w-full h-full bg-black hidden z-20 object-contain"></video>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="w-full py-6 text-center border-t border-gray-800 glass mt-8">
+        <p class="text-xs md:text-sm text-gray-400 font-['Orbitron']">
+            Development By <a href="https://visernic.com" class="text-green-400 hover:text-green-300 font-bold transition-colors relative group">
+                Visernic Limited
+                <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-400 transition-all group-hover:w-full"></span>
+            </a>
+        </p>
+    </footer>
+
+    <!-- MODAL -->
+    <div id="importModal" class="fixed inset-0 bg-black/80 hidden z-[100] flex items-center justify-center p-4">
+        <div class="bg-gray-900 border border-gray-700 p-6 rounded-2xl w-full max-w-sm">
+            <h3 class="text-xl font-bold mb-4 text-white"><span id="modalPlatform">Social</span> Import</h3>
+            <p class="text-xs text-gray-400 mb-4">Enter Username or URL. We will set the name.</p>
+            <input type="text" id="socialUrlInput" placeholder="Paste link..." class="w-full p-3 bg-black border border-gray-600 rounded-lg text-white mb-4">
+            <div class="flex justify-end gap-3">
+                <button onclick="closeImportModal()" class="px-4 py-2 text-sm text-gray-400 hover:text-white">Cancel</button>
+                <button onclick="submitImport()" class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-bold">Import</button>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="renderCanvas" width="1080" height="1920" style="display:none;"></canvas>
+
+    <script>
+        /** CONFIG */
+        const CONFIG = {
+            fps: 60,
+            winScore: 10,
+            colors: { p1: '#ff2a2a', p2: '#00ccff', frame: '#39ff14', bg: '#080808' },
+            scytheUrl: "https://img.icons8.com/?size=100&id=6IyXfrxdkMa5&format=png&color=FFFFFF",
+            coinUrl: "https://img.icons8.com/?size=100&id=A05obJXqB1TJ&format=png&color=000000"
+        };
+        const ARENA = { x: 80, y: 550, w: 920, h: 920 };
+
+        /** STATE */
+        let state = {
+            p1Img: null, p2Img: null, scytheImg: null, coinImg: null,
+            p1Name: "", p2Name: "",
+            p1Score: 0, p2Score: 0,
+            frame: 0, recording: false, winner: 0,
+            shake: 0, speedMult: 1.0,
+            balls: [], particles: [], coins: []
+        };
+        let mediaRecorder, recordedChunks = [], videoBlobUrl = null;
+        let activeImportPlayer = 1;
+
+        const el = id => document.getElementById(id);
+        const els = {
+            preview: el('previewCanvas'), render: el('renderCanvas'), start: el('startBtn'),
+            p1ui: el('p1-ui-preview'), p2ui: el('p2-ui-preview'),
+            name1: el('name1'), name2: el('name2'), video: el('finalVideo'),
+            modal: el('importModal'), socialInput: el('socialUrlInput')
+        };
+        const ctxP = els.preview.getContext('2d');
+        const ctxR = els.render.getContext('2d');
+
+        const loadAsset = (url) => {
+            const img = new Image(); img.crossOrigin = "anonymous"; img.src = url; return img;
+        };
+        state.scytheImg = loadAsset(CONFIG.scytheUrl);
+        state.coinImg = loadAsset(CONFIG.coinUrl);
+        state.scytheImg.onload = () => drawStaticPreview();
+
+        // Init
+        drawStaticPreview();
+        el('upload1').addEventListener('change', e => loadImg(e, 1));
+        el('upload2').addEventListener('change', e => loadImg(e, 2));
+        els.start.addEventListener('click', startBattle);
+
+        function loadImg(e, num) {
+            const f = e.target.files[0];
+            if (!f) return;
+            const r = new FileReader();
+            r.onload = evt => {
+                const img = new Image();
+                img.onload = () => {
+                    if (num === 1) { state.p1Img = img; els.p1ui.style.backgroundImage = `url(${evt.target.result})`; }
+                    else { state.p2Img = img; els.p2ui.style.backgroundImage = `url(${evt.target.result})`; }
+                    checkReady();
+                    drawStaticPreview();
+                };
+                img.src = evt.target.result;
+            };
+            r.readAsDataURL(f);
+        }
+
+        function checkReady() { if (state.p1Img && state.p2Img) els.start.disabled = false; }
+
+        function openImportModal(pNum, platform) {
+            activeImportPlayer = pNum;
+            els.modal.classList.remove('hidden');
+            el('modalPlatform').innerText = platform === 'tiktok' ? 'TikTok' : 'Facebook';
+            els.socialInput.value = ''; els.socialInput.focus();
+        }
+        function closeImportModal() { els.modal.classList.add('hidden'); }
+        function submitImport() {
+            const url = els.socialInput.value.trim();
+            if (!url) { closeImportModal(); return; }
+            let name = url.substring(0, 10);
+            if(url.includes('tiktok.com')) { const match = url.match(/@([a-zA-Z0-9_.]+)/); if(match) name = match[1]; } 
+            else if(url.includes('facebook.com')) { const parts = url.split('/'); const last = parts[parts.length-1] || parts[parts.length-2]; name = last.replace('/', ''); }
+            if(activeImportPlayer === 1) els.name1.value = name; else els.name2.value = name;
+            const avatarUrl = `https://ui-avatars.com/api/?name=${name}&background=random&color=fff&size=200&font-size=0.5`;
+            const img = new Image(); img.crossOrigin = "anonymous";
+            img.onload = () => {
+                if(activeImportPlayer === 1) { state.p1Img = img; els.p1ui.style.backgroundImage = `url(${avatarUrl})`; }
+                else { state.p2Img = img; els.p2ui.style.backgroundImage = `url(${avatarUrl})`; }
+                checkReady(); drawStaticPreview();
+            };
+            img.src = avatarUrl;
+            closeImportModal();
+        }
+
+        async function shareApp() {
+            if (navigator.share) { try { await navigator.share({ title: 'Battle Maker', url: window.location.href }); } catch (err) {} } 
+            else { alert('Link Copied!'); navigator.clipboard.writeText(window.location.href); }
+        }
+
+        function drawStaticPreview() {
+            drawBackground(ctxP, 540, 960);
+            ctxP.strokeStyle = CONFIG.colors.frame; ctxP.lineWidth = 4;
+            ctxP.strokeRect(40, 275, 460, 460);
+            ctxP.fillStyle = 'white'; ctxP.font = 'bold 20px "Hind Siliguri"';
+            ctxP.textAlign = 'center'; ctxP.fillText("Ready to Battle...", 270, 500);
+        }
+
+        function startBattle() {
+            state.p1Name = els.name1.value.trim() || "Player 1";
+            state.p2Name = els.name2.value.trim() || "Player 2";
+            els.start.disabled = true;
+            el('resultUI').classList.add('hidden'); el('processingUI').classList.remove('hidden');
+            els.video.classList.add('hidden'); els.video.pause();
+
+            state.p1Score = 0; state.p2Score = 0;
+            state.frame = 0; state.winner = 0;
+            state.recording = true; state.particles = []; state.coins = [];
+            
+            // Speed adjusted for fast but clear action
+            state.balls = [
+                { x: 300, y: 700, vx: 12, vy: -12, r: 60, c: CONFIG.colors.p1, trail: [], angle: 0 },
+                { x: 780, y: 700, vx: -12, vy: 12, r: 60, c: CONFIG.colors.p2, trail: [], angle: Math.PI }
+            ];
+
+            const stream = els.render.captureStream(CONFIG.fps);
+            let mime = MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4' : 'video/webm;codecs=vp9';
+            mediaRecorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 12000000 });
+            recordedChunks = [];
+            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+            mediaRecorder.onstop = finishRecording;
+            mediaRecorder.start();
+            animate();
+        }
+
+        function animate() {
+            if (!state.recording) return;
+            updatePhysics();
+            drawScene(ctxR, 1080, 1920);
+            ctxP.drawImage(els.render, 0, 0, 540, 960);
+            state.frame++;
+            
+            let pct = (Math.max(state.p1Score, state.p2Score) / CONFIG.winScore) * 100;
+            if(state.winner > 0) pct = 99;
+            el('progressBar').style.width = `${pct}%`;
+            el('percentText').innerText = `${Math.floor(pct)}%`;
+
+            if (state.winner > 0 && (state.frame - state.winFrame > 240)) { // 4s celebration
+                mediaRecorder.stop(); state.recording = false;
+            } else {
+                // Extended time limit (300s) to basically force 10 goal win condition
+                if(state.frame > 18000 && state.winner === 0) forceWin();
+                requestAnimationFrame(animate);
+            }
+        }
+
+        function forceWin() {
+            if(state.p1Score > state.p2Score) triggerWin(1);
+            else if(state.p2Score > state.p1Score) triggerWin(2);
+            else triggerWin(Math.random() > 0.5 ? 1 : 2);
+        }
+
+        function updatePhysics() {
+            if (state.shake > 0) state.shake *= 0.9;
+            if (state.winner > 0) { updateEffects(); return; }
+
+            // Speed Ramp: More Aggressive to finish in reasonable time
+            state.speedMult = Math.min(2.0, 1.0 + (state.frame * 0.0005));
+
+            state.balls.forEach(b => {
+                b.angle += 0.25 * state.speedMult; 
+                b.trail.push({x:b.x, y:b.y});
+                if(b.trail.length > 15) b.trail.shift();
+                
+                b.x += b.vx * state.speedMult;
+                b.y += b.vy * state.speedMult;
+
+                const buffer = 30; 
+                if(b.x - b.r - buffer < ARENA.x) { b.x = ARENA.x + b.r + buffer; b.vx *= -1; }
+                if(b.x + b.r + buffer > ARENA.x + ARENA.w) { b.x = ARENA.x + ARENA.w - b.r - buffer; b.vx *= -1; }
+                if(b.y - b.r - buffer < ARENA.y) { b.y = ARENA.y + b.r + buffer; b.vy *= -1; }
+                if(b.y + b.r + buffer > ARENA.y + ARENA.h) { b.y = ARENA.y + ARENA.h - b.r - buffer; b.vy *= -1; }
+            });
+
+            const b1 = state.balls[0], b2 = state.balls[1];
+            const dx = b2.x - b1.x, dy = b2.y - b1.y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            const limit = b1.r + b2.r + 30; 
+
+            if (dist < limit) {
+                state.shake = 20;
+                b1.angle += 0.5; b2.angle -= 0.5;
+
+                const angle = Math.atan2(dy, dx);
+                const sin = Math.sin(angle), cos = Math.cos(angle);
+                
+                const vx1 = b1.vx*cos + b1.vy*sin;
+                const vy1 = b1.vy*cos - b1.vx*sin;
+                const vx2 = b2.vx*cos + b2.vy*sin;
+                const vy2 = b2.vy*cos - b2.vx*sin;
+
+                b1.vx = vx2*cos - vy1*sin; b1.vy = vy1*cos + vx2*sin;
+                b2.vx = vx1*cos - vy2*sin; b2.vy = vy2*cos + vx1*sin;
+
+                const overlap = limit - dist;
+                b1.x -= overlap/2 * Math.cos(angle); b1.y -= overlap/2 * Math.sin(angle);
+                b2.x += overlap/2 * Math.cos(angle); b2.y += overlap/2 * Math.sin(angle);
+
+                spawnSparks((b1.x+b2.x)/2, (b1.y+b2.y)/2);
+                if(Math.random() > 0.5) state.p1Score++; else state.p2Score++;
+                
+                if(state.p1Score >= CONFIG.winScore) triggerWin(1);
+                else if(state.p2Score >= CONFIG.winScore) triggerWin(2);
+            }
+            updateEffects();
+        }
+
+        function triggerWin(pId) {
+            if(state.winner !== 0) return;
+            state.winner = pId; 
+            state.winFrame = state.frame;
+            for(let i=0; i<100; i++) {
+                let tint = '#FFD700'; 
+                const r = Math.random();
+                if(r > 0.6) tint = '#C0C0C0'; else if(r > 0.3) tint = '#B76E79';
+                state.coins.push({
+                    x: Math.random() * 1080, y: -Math.random() * 1000 - 50,
+                    vy: Math.random() * 10 + 5, vx: (Math.random() - 0.5) * 4,
+                    rot: Math.random() * 6.28, rotSpeed: (Math.random() - 0.5) * 0.2, tint: tint
+                });
+            }
+        }
+
+        function updateEffects() {
+            for(let i=state.particles.length-1; i>=0; i--) {
+                let p = state.particles[i]; p.x+=p.vx; p.y+=p.vy; p.life-=0.05;
+                if(p.life<=0) state.particles.splice(i,1);
+            }
+            for(let c of state.coins) {
+                c.y += c.vy; c.x += c.vx; c.rot += c.rotSpeed;
+                if(c.y > 2000) c.y = -200;
+            }
+        }
+
+        function spawnSparks(x, y) {
+            for(let i=0; i<15; i++) {
+                state.particles.push({
+                    x:x, y:y, vx:(Math.random()-0.5)*20, vy:(Math.random()-0.5)*20,
+                    life:1.0, c: Math.random()>0.5?'#fff':'#ffff00'
+                });
+            }
+        }
+
+        function drawBackground(ctx, w, h) {
+            const grad = ctx.createRadialGradient(w/2, h/2, 100, w/2, h/2, h);
+            grad.addColorStop(0, '#1a1a2e'); grad.addColorStop(1, '#000000');
+            ctx.fillStyle = grad; ctx.fillRect(-20, -20, w+40, h+40);
+            ctx.strokeStyle = 'rgba(57, 255, 20, 0.05)'; ctx.lineWidth = 2;
+            ctx.beginPath();
+            for(let x=0; x<=w; x+=120) { ctx.moveTo(x, 0); ctx.lineTo(x, h); }
+            for(let y=0; y<=h; y+=120) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
+            ctx.stroke();
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+            for(let i=0; i<30; i++) {
+                let rx = (Math.sin(i*132.1)*10000)%w; if(rx<0) rx+=w;
+                let ry = (Math.cos(i*453.2)*10000)%h; if(ry<0) ry+=h;
+                ctx.beginPath(); ctx.arc(rx, ry, Math.random()*3, 0, Math.PI*2); ctx.fill();
+            }
+        }
+
+        function drawScene(ctx, w, h) {
+            let sx = (Math.random()-0.5)*state.shake; let sy = (Math.random()-0.5)*state.shake;
+            ctx.save(); ctx.translate(sx, sy);
+            drawBackground(ctx, w, h);
+
+            ctx.shadowBlur = 30; ctx.shadowColor = CONFIG.colors.frame;
+            ctx.strokeStyle = CONFIG.colors.frame; ctx.lineWidth = 15;
+            ctx.strokeRect(ARENA.x, ARENA.y, ARENA.w, ARENA.h); ctx.shadowBlur = 0;
+
+            drawUI(ctx, w);
+
+            state.balls.forEach((b, i) => {
+                const playerNum = i + 1;
+                const isLoser = (state.winner !== 0 && state.winner !== playerNum);
+                ctx.save();
+                if(isLoser) {
+                     let fade = Math.max(0, 1.0 - (state.frame - state.winFrame) / 60);
+                     ctx.globalAlpha = fade;
+                }
+                drawBall(ctx, b, i===0?state.p1Img:state.p2Img);
+                ctx.restore();
+            });
+
+            ctx.globalCompositeOperation = 'lighter';
+            for(let p of state.particles) {
+                ctx.globalAlpha = p.life; ctx.fillStyle = p.c;
+                ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, Math.PI*2); ctx.fill();
+            }
+            ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1.0;
+
+            for(let c of state.coins) {
+                ctx.save(); ctx.translate(c.x, c.y); ctx.rotate(c.rot);
+                if(state.coinImg) {
+                    ctx.shadowBlur = 10; ctx.shadowColor = c.tint;
+                    ctx.drawImage(state.coinImg, -30, -30, 60, 60);
+                } else {
+                    ctx.fillStyle = c.tint; ctx.beginPath(); ctx.arc(0,0,30,0,Math.PI*2); ctx.fill();
+                }
+                ctx.restore();
+            }
+
+            if(state.winner > 0) drawWinScreen(ctx, w, h);
+            ctx.restore();
+        }
+
+        function drawUI(ctx, w) {
+            const topY = 280; const leftX = 220, rightX = w-220;
+            ctx.font = '900 130px Bangers'; ctx.fillStyle = '#fff'; ctx.strokeStyle = '#000'; ctx.lineWidth = 8;
+            ctx.textAlign = 'center'; ctx.strokeText("VS", w/2, topY + 50); ctx.fillText("VS", w/2, topY + 50);
+            ctx.font = '900 120px Roboto';
+            ctx.fillStyle = CONFIG.colors.p1; ctx.fillText(state.p1Score, leftX, topY + 180);
+            ctx.fillStyle = CONFIG.colors.p2; ctx.fillText(state.p2Score, rightX, topY + 180);
+            drawPlayerProfile(ctx, leftX, topY, state.p1Img, state.p1Name, CONFIG.colors.p1);
+            drawPlayerProfile(ctx, rightX, topY, state.p2Img, state.p2Name, CONFIG.colors.p2);
+        }
+
+        function drawPlayerProfile(ctx, x, y, img, name, color) {
+            const r = 90;
+            ctx.save(); ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.clip();
+            if(img) ctx.drawImage(img, x-r, y-r, r*2, r*2); else { ctx.fillStyle='#333'; ctx.fill(); }
+            ctx.restore();
+            ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.lineWidth = 6; ctx.strokeStyle = color; ctx.stroke();
+            ctx.font = 'bold 45px "Hind Siliguri"'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+            ctx.fillStyle = color; ctx.shadowColor = 'black'; ctx.shadowBlur = 10;
+            ctx.fillText(name, x, y - r - 15); ctx.shadowBlur = 0;
+        }
+
+        function drawBall(ctx, b, img) {
+            ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.angle);
+            if (state.scytheImg) {
+                ctx.shadowColor = b.c; ctx.shadowBlur = 20;
+                ctx.drawImage(state.scytheImg, b.r - 20, -60, 140, 120); ctx.shadowBlur = 0;
+            } else {
+                ctx.fillStyle = '#fff'; ctx.fillRect(b.r, -5, 100, 10);
+            }
+            ctx.rotate(-b.angle); ctx.rotate(b.angle);  
+            ctx.beginPath(); ctx.arc(0,0,b.r,0,Math.PI*2); ctx.clip();
+            if(img) ctx.drawImage(img, -b.r, -b.r, b.r*2, b.r*2); else { ctx.fillStyle='#444'; ctx.fill(); }
+            ctx.beginPath(); ctx.arc(0,0,b.r,0,Math.PI*2); ctx.lineWidth=5; ctx.strokeStyle=b.c; ctx.stroke();
+            ctx.restore();
+        }
+
+        function drawWinScreen(ctx, w, h) {
+            const pid = state.winner;
+            const c = pid===1?CONFIG.colors.p1:CONFIG.colors.p2;
+            const name = pid===1?state.p1Name:state.p2Name;
+            const img = pid===1?state.p1Img:state.p2Img;
+            
+            ctx.fillStyle = 'rgba(0,0,0,0.85)'; 
+            let alpha = Math.min(0.85, (state.frame - state.winFrame) / 30);
+            ctx.globalAlpha = alpha; ctx.fillRect(0,0,w,h); ctx.globalAlpha = 1.0;
+            
+            ctx.save(); ctx.translate(w/2, 600); ctx.rotate(state.frame * 0.01);
+            const grad = ctx.createRadialGradient(0,0, 50, 0,0, 800);
+            grad.addColorStop(0, c); grad.addColorStop(1, 'transparent');
+            ctx.fillStyle = grad; ctx.globalAlpha = 0.3;
+            for(let i=0; i<8; i++) { ctx.rotate(Math.PI/4); ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-100, 1000); ctx.lineTo(100, 1000); ctx.fill(); }
+            ctx.restore(); ctx.globalAlpha = 1.0;
+
+            ctx.shadowColor = c; ctx.shadowBlur=60;
+            drawPlayerProfile(ctx, w/2, 600, img, "", c); ctx.shadowBlur=0;
+            ctx.font = '200px Arial'; ctx.textAlign = 'center'; ctx.fillText("👑", w/2, 380);
+            ctx.font = '900 130px Bangers'; ctx.fillStyle = '#ffd700'; ctx.fillText("WINNER!", w/2, 850);
+            ctx.font = 'bold 80px "Hind Siliguri"'; ctx.fillStyle = 'white'; ctx.fillText(name, w/2, 980);
+        }
+
+        function finishRecording() {
+            const blob = new Blob(recordedChunks, { type: 'video/mp4' });
+            videoBlobUrl = URL.createObjectURL(blob);
+            el('processingUI').classList.add('hidden'); el('resultUI').classList.remove('hidden');
+            el('progressBar').style.width = '100%'; els.start.disabled = false;
+        }
+
+        function previewRecordedVideo() {
+            els.video.src = videoBlobUrl; els.video.classList.remove('hidden'); els.video.play();
+        }
+
+        function downloadVideo() {
+            const a = document.createElement('a'); a.style.display = 'none'; a.href = videoBlobUrl;
+            a.download = `Battle_${state.p1Name}_VS_${state.p2Name}.mp4`;
+            document.body.appendChild(a); a.click(); setTimeout(() => document.body.removeChild(a), 100);
+        }
+    </script>
+</body>
+</html>
